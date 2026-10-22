@@ -1,8 +1,15 @@
 const express = require('express');
+const cors = require('cors');
 const courseRoutes = require('./routes/courseRoutes');
 
 const app = express();
 
+app.use(
+  cors({
+    origin: 'http://localhost:5173',
+    methods: ['GET', 'POST', 'OPTIONS'],
+  }),
+);
 app.use(express.json());
 
 app.get('/health', (req, res) => {
