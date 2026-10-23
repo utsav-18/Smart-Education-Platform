@@ -1,0 +1,14 @@
+azure_location = "eastus"
+
+# Supply these through a secure local or CI mechanism; do not commit real IDs.
+azure_subscription_id = "00000000-0000-0000-0000-000000000000"
+azure_tenant_id       = "00000000-0000-0000-0000-000000000000"
+
+container_images = {
+  frontend = "example.invalid/smart-education-frontend:replace-me"
+  backend  = "example.invalid/smart-education-backend:replace-me"
+}
+
+tags = {
+  Owner = "education-platform-team"
+}

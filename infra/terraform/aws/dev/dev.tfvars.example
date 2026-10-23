@@ -1,0 +1,12 @@
+aws_region = "us-east-1"
+
+container_images = {
+  frontend = "000000000000.dkr.ecr.us-east-1.amazonaws.com/smart-education-platform-dev-frontend:ci"
+  backend  = "000000000000.dkr.ecr.us-east-1.amazonaws.com/smart-education-platform-dev-backend:ci"
+}
+
+frontend_origin = "https://replace-with-approved-frontend-origin"
+
+tags = {
+  Owner = "education-platform-team"
+}
