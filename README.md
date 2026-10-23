@@ -138,8 +138,10 @@ The workflow in `.github/workflows/ci.yml` runs for pushes to `main` or `develop
 - Backend dependency installation with `npm ci` and the backend test suite.
 - Frontend dependency installation with `npm ci` and the production Vite build.
 - Backend and frontend Docker image builds using Docker Buildx.
+- Docker Compose configuration validation (`docker compose config -q`).
+- Docker Compose integration testing (orchestration, health checks, database seeding, API verification, and teardown).
 
-The workflow only builds images locally on the GitHub-hosted runner. It does not push images, require cloud credentials, start MongoDB, or provision AWS/Azure resources.
+The workflow executes on GitHub-hosted Ubuntu runners. It does not push images, require cloud credentials, or provision public cloud resources.
 
 ## API Specification
 
