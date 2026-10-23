@@ -4,9 +4,23 @@ const courseRoutes = require('./routes/courseRoutes');
 
 const app = express();
 
+const defaultOrigins = [
+  'http://localhost:5173',
+  'http://localhost:3000',
+  'http://localhost:8080',
+  'http://localhost',
+];
+
+const rawOrigin = process.env.CLIENT_ORIGIN;
+const corsOrigin = !rawOrigin
+  ? defaultOrigins
+  : rawOrigin === '*'
+    ? '*'
+    : rawOrigin.split(',').map((origin) => origin.trim());
+
 app.use(
   cors({
-    origin: 'http://localhost:5173',
+    origin: corsOrigin,
     methods: ['GET', 'POST', 'OPTIONS'],
   }),
 );

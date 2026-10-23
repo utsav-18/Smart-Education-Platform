@@ -1,16 +1,16 @@
 # Smart Education Platform
 
-Initial MERN implementation for the Multi-Cloud CI/CD System for Smart Education Platforms project. The current milestone focuses on local development and a first GitHub Actions CI workflow; cloud provisioning and deployment remain future work.
+Initial MERN implementation for the Multi-Cloud CI/CD System for Smart Education Platforms project. The current milestone focuses on local development, Docker Compose orchestration, and a GitHub Actions CI workflow; cloud provisioning and deployment remain future work.
 
 ## Architecture
 
 - `backend/`: Express REST API, Mongoose model, database connection, and Node.js/Supertest tests.
-- `frontend/`: React dashboard built with Vite and connected to the backend through `VITE_API_BASE_URL`.
-- MongoDB stores course data. The backend does not connect to MongoDB when the Express app is imported by tests.
+- `frontend/`: React dashboard built with Vite, served via Nginx in production, and connected to the backend.
+- `mongodb`: MongoDB container with persistent named volume for course data.
 
-## Local setup
+## Local Setup (Without Docker)
 
-Requirements: Node.js 22+, npm, and MongoDB (local installation or a MongoDB container).
+Requirements: Node.js 22+, npm, and MongoDB (local installation or container).
 
 1. Configure the backend:
 
@@ -30,7 +30,14 @@ Requirements: Node.js 22+, npm, and MongoDB (local installation or a MongoDB con
    npm install
    ```
 
-3. Start two terminals:
+3. Seed courses (optional):
+
+   ```powershell
+   cd backend
+   npm run seed
+   ```
+
+4. Start two terminals:
 
    ```powershell
    # Terminal 1
@@ -44,7 +51,7 @@ Requirements: Node.js 22+, npm, and MongoDB (local installation or a MongoDB con
 
    Open the Vite URL shown in the frontend terminal. The dashboard retrieves courses from `http://localhost:5000/api/courses`.
 
-4. Run backend tests:
+5. Run backend tests:
 
    ```powershell
    cd backend
@@ -53,7 +60,78 @@ Requirements: Node.js 22+, npm, and MongoDB (local installation or a MongoDB con
 
 Tests stub model calls where appropriate, so health, retrieval behavior, nonexistent IDs, and validation tests do not require a running MongoDB instance.
 
-## Continuous integration
+## Docker Compose (Recommended)
+
+Docker Compose orchestrates the full multi-tier stack: `frontend` (Nginx), `backend` (Node.js/Express), and `mongodb` (persistent database).
+
+### 1. Build and Start Services
+
+```powershell
+docker compose up -d --build
+```
+
+Compose starts the services with dependency and health-check management:
+1. `mongodb` initializes with a persistent named volume (`mongodb_data`).
+2. `backend` connects to `mongodb://mongodb:27017/smart_education_platform` once the database reports healthy.
+3. `frontend` starts Nginx once the backend reports healthy.
+
+### 2. Verify Status and Health
+
+Check running container status and health:
+
+```powershell
+docker compose ps
+```
+
+All three services (`frontend`, `backend`, `mongodb`) should show as `healthy` / `Up`.
+
+### 3. Seed Course Data
+
+Seed the 5 sample courses into the containerized MongoDB database (safe to run repeatedly; uses idempotent upserts):
+
+```powershell
+docker compose exec backend npm run seed
+```
+
+### 4. Access the Application
+
+- **Frontend Application**: [http://localhost:3000](http://localhost:3000)
+- **Backend API**: [http://localhost:5000/api/courses](http://localhost:5000/api/courses)
+- **Backend Health Check**: [http://localhost:5000/health](http://localhost:5000/health)
+
+### 5. Stop Services
+
+To stop containers while **preserving database data**:
+
+```powershell
+docker compose down
+```
+
+To stop containers and **wipe the persistent database volume**:
+
+```powershell
+docker compose down -v
+```
+
+## Manual Docker Commands
+
+If running images individually without Docker Compose:
+
+1. Backend:
+   ```powershell
+   docker build -t smart-education-backend ./backend
+   docker run --rm -p 5000:5000 `
+     -e MONGO_URI=mongodb://host.docker.internal:27017/smart_education_platform `
+     smart-education-backend
+   ```
+
+2. Frontend:
+   ```powershell
+   docker build -t smart-education-frontend ./frontend
+   docker run --rm -p 3000:80 smart-education-frontend
+   ```
+
+## Continuous Integration
 
 The workflow in `.github/workflows/ci.yml` runs for pushes to `main` or `develop` and for pull requests targeting either branch. It uses Node.js 22 and checks:
 
@@ -61,9 +139,9 @@ The workflow in `.github/workflows/ci.yml` runs for pushes to `main` or `develop
 - Frontend dependency installation with `npm ci` and the production Vite build.
 - Backend and frontend Docker image builds using Docker Buildx.
 
-The workflow only builds images locally on the GitHub-hosted runner. It does not push images, require cloud credentials, start MongoDB, or provision AWS/Azure resources. The current backend tests are intentionally independent of a live MongoDB instance; database integration tests should be added as a separate job when they are introduced.
+The workflow only builds images locally on the GitHub-hosted runner. It does not push images, require cloud credentials, start MongoDB, or provision AWS/Azure resources.
 
-## API
+## API Specification
 
 | Method | Endpoint | Description |
 | --- | --- | --- |
@@ -83,26 +161,6 @@ Example request:
 }
 ```
 
-## Docker
-
-Build and run the backend (with MongoDB available at the configured URI):
-
-```powershell
-docker build -t smart-education-backend ./backend
-docker run --rm -p 5000:5000 `
-  -e MONGO_URI=mongodb://host.docker.internal:27017/smart_education_platform `
-  smart-education-backend
-```
-
-Build the frontend:
-
-```powershell
-docker build -t smart-education-frontend ./frontend
-docker run --rm -p 8080:80 smart-education-frontend
-```
-
-The frontend API URL is compiled into the Vite bundle at build time. For a containerized deployment, provide `VITE_API_BASE_URL` as a build argument or configure the frontend reverse proxy in a later deployment milestone.
-
-## Future work
+## Future Work
 
 The next recommended task is to add database integration coverage and then extend the CI workflow with that test job. Cloud resources, credentials, Terraform, Kubernetes, and public deployment are intentionally not included in this milestone.
