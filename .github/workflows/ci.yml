@@ -57,6 +57,9 @@ jobs:
       - name: Install frontend dependencies
         run: npm ci
 
+      - name: Run frontend tests
+        run: npm test
+
       - name: Build frontend
         run: npm run build
 
@@ -116,6 +119,8 @@ jobs:
         run: |
           curl --fail --retry 5 --retry-delay 2 http://localhost:5000/health
           curl --fail --retry 5 --retry-delay 2 http://localhost:3000/health
+          curl --fail --retry 5 --retry-delay 2 http://localhost:5000/readyz
+          curl --fail --retry 5 --retry-delay 2 http://localhost:3000/readyz
 
       - name: Seed sample courses
         run: docker compose exec -T backend npm run seed

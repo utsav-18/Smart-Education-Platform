@@ -11,4 +11,9 @@ async function connectDB() {
   console.log('MongoDB connected');
 }
 
+function isDatabaseReady() {
+  return mongoose.connection.readyState === 1;
+}
+
 module.exports = connectDB;
+module.exports.isDatabaseReady = isDatabaseReady;

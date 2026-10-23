@@ -49,7 +49,7 @@ Requirements: Node.js 22+, npm, and MongoDB (local installation or container).
    npm run dev
    ```
 
-   Open the Vite URL shown in the frontend terminal. The dashboard retrieves courses from `http://localhost:5000/api/courses`.
+   Open the Vite URL shown in the frontend terminal. With the example `.env`, the dashboard retrieves courses from `http://localhost:5000/api/courses`.
 
 5. Run backend tests:
 
@@ -59,6 +59,8 @@ Requirements: Node.js 22+, npm, and MongoDB (local installation or container).
    ```
 
 Tests stub model calls where appropriate, so health, retrieval behavior, nonexistent IDs, and validation tests do not require a running MongoDB instance.
+
+`GET /health` is a lightweight liveness check. `GET /readyz` verifies that MongoDB is connected and returns HTTP 503 until the backend is ready for database operations. Course API requests also return HTTP 503 while MongoDB is unavailable.
 
 ## Docker Compose (Recommended)
 
@@ -98,6 +100,7 @@ docker compose exec backend npm run seed
 - **Frontend Application**: [http://localhost:3000](http://localhost:3000)
 - **Backend API**: [http://localhost:5000/api/courses](http://localhost:5000/api/courses)
 - **Backend Health Check**: [http://localhost:5000/health](http://localhost:5000/health)
+- **Backend Readiness Check**: [http://localhost:5000/readyz](http://localhost:5000/readyz)
 
 ### 5. Stop Services
 
@@ -142,6 +145,8 @@ The workflow in `.github/workflows/ci.yml` runs for pushes to `main` or `develop
 - Docker Compose integration testing (orchestration, health checks, database seeding, API verification, and teardown).
 
 The workflow executes on GitHub-hosted Ubuntu runners. It does not push images, require cloud credentials, or provision public cloud resources.
+
+The production frontend uses the same-origin `/api` path, which Nginx proxies to the backend service. Local Vite development can use `VITE_API_BASE_URL=http://localhost:5000` from `frontend/.env.example`. The production bundle does not require or embed a backend hostname.
 
 ## API Specification
 

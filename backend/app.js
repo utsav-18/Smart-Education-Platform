@@ -1,5 +1,6 @@
 const express = require('express');
 const cors = require('cors');
+const database = require('./config/db');
 const courseRoutes = require('./routes/courseRoutes');
 
 const app = express();
@@ -30,7 +31,21 @@ app.get('/health', (req, res) => {
   res.status(200).json({ status: 'ok' });
 });
 
-app.use('/api/courses', courseRoutes);
+app.get('/readyz', (req, res) => {
+  if (!database.isDatabaseReady()) {
+    return res.status(503).json({ status: 'not ready' });
+  }
+
+  return res.status(200).json({ status: 'ready' });
+});
+
+app.use('/api/courses', (req, res, next) => {
+  if (!database.isDatabaseReady()) {
+    return res.status(503).json({ error: 'Service unavailable' });
+  }
+
+  return next();
+}, courseRoutes);
 
 app.use((req, res) => {
   res.status(404).json({ error: 'Route not found' });

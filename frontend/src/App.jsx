@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
+import { getCoursesUrl } from './apiUrl';
 
-const apiBaseUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000';
+const apiBaseUrl = import.meta.env.VITE_API_BASE_URL;
 
 function App() {
   const [courses, setCourses] = useState([]);
@@ -10,7 +11,7 @@ function App() {
   useEffect(() => {
     async function loadCourses() {
       try {
-        const response = await fetch(`${apiBaseUrl}/api/courses`);
+        const response = await fetch(getCoursesUrl(apiBaseUrl));
         if (!response.ok) {
           throw new Error(`Request failed with status ${response.status}`);
         }

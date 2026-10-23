@@ -3,7 +3,10 @@ const assert = require('node:assert/strict');
 const request = require('supertest');
 
 const app = require('../app');
+const database = require('../config/db');
 const Course = require('../models/Course');
+
+database.isDatabaseReady = () => true;
 
 test('GET /health returns HTTP 200', async () => {
   const response = await request(app).get('/health');
@@ -46,6 +49,30 @@ test('GET /api/courses/:id returns HTTP 404 for a nonexistent course', async () 
   } finally {
     Course.findById = originalFindById;
   }
+});
+
+test('GET /readyz returns HTTP 503 when MongoDB is unavailable', async () => {
+  const originalIsDatabaseReady = database.isDatabaseReady;
+  database.isDatabaseReady = () => false;
+
+  try {
+    const readinessResponse = await request(app).get('/readyz');
+    const coursesResponse = await request(app).get('/api/courses');
+
+    assert.equal(readinessResponse.status, 503);
+    assert.deepEqual(readinessResponse.body, { status: 'not ready' });
+    assert.equal(coursesResponse.status, 503);
+    assert.deepEqual(coursesResponse.body, { error: 'Service unavailable' });
+  } finally {
+    database.isDatabaseReady = originalIsDatabaseReady;
+  }
+});
+
+test('GET /readyz returns HTTP 200 when MongoDB is ready', async () => {
+  const response = await request(app).get('/readyz');
+
+  assert.equal(response.status, 200);
+  assert.deepEqual(response.body, { status: 'ready' });
 });
 
 test('POST /api/courses rejects invalid course data', async () => {
