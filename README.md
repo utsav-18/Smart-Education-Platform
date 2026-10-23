@@ -209,7 +209,7 @@ authentication are stored in the repository.
 | 2. Implementation and Technical Soundness | MERN source, readiness behavior, Dockerfiles, Compose, tests, CI workflow, AWS modules | Local application and configuration checks verified; cloud runtime untested |
 | 3. Resource and Tool Utilization | Node/npm lockfiles, Docker, MongoDB, Compose, GitHub Actions, Terraform provider lockfiles | Tools used and local checks reproducible |
 | 4. Design Alternatives and Choice of Approach | Compose versus direct local execution; ECS Fargate versus Kubernetes; public tasks versus private tasks/NAT; AWS/Azure root separation | Rationale documented; alternatives not experimentally compared |
-| 5. Workflow Clarity and Documentation | README commands, CI jobs, diagrams, API table, Terraform README, cleanup and prerequisite notes | Reproduction workflow documented; screenshots and pipeline timing evidence still needed |
+| 5. Workflow Clarity and Documentation | README commands, CI jobs, diagrams, API table, Terraform README, cleanup and prerequisite notes, locally collected evidence screenshots, and successful GitHub Actions run #8 | Documentation and hosted CI evidence verified; cloud deployment evidence remains outstanding |
 
 ## 8. Acceptance criteria
 
@@ -262,27 +262,40 @@ claimed here.
 - The default AWS public-task/no-NAT configuration is a documented development
   cost trade-off, not a production security recommendation.
 
-## 11. Evidence still needed for submission
+## 11. Submission Evidence and Remaining Work
 
-Within the remaining 2–3 days, prioritize:
+The following evidence has been collected locally and is not claimed to be
+committed or publicly accessible from this repository:
 
-1. Capture screenshots of the populated dashboard, Compose health, and API
-   responses.
-2. Capture a GitHub Actions run showing all five jobs passing.
-3. Record the GitHub Actions run URL and job durations; do not infer them from
-   local timings.
-4. Add a short report section explaining why ECS Fargate was selected initially
-   and why Kubernetes remains future work.
-5. Add the three diagrams above to the final report or presentation.
-6. Review and commit the Terraform tree only after confirming the exact
-   intended files and secrets scan.
-7. Keep cloud deployment as future work unless there is sufficient time for a
-   separately approved, authenticated, cost-controlled experiment.
+- `02-dashboard.png`
+- `03-docker-status.png`
+- `04-courses-api.png`
+- `05-backend-tests.png`
+- `06-frontend-tests.png`
+- `07-frontend-build.png`
+- `08-github-actions-success.png`
+- A workflow-details screenshot showing all five CI jobs passed.
 
-## 12. Files that should be committed
+GitHub Actions run #8 for commit `5a499b2` succeeded in 1 minute 15 seconds.
+The five passed jobs were `backend-test`, `frontend-build`, `docker-build`,
+`compose-validate`, and `compose-integration-test`. This confirms the hosted
+CI workflow, but does not prove cloud deployment or satisfy every rubric
+criterion by itself.
 
-The current worktree contains the application/CI commits plus an uncommitted
-Terraform tree. The Terraform files to review and commit are:
+Remaining work is limited to:
+
+1. Include the collected screenshots and the diagrams in the final CIS report
+   or presentation.
+2. Explain the ECS Fargate choice and why Kubernetes remains future work.
+3. Keep AWS/Azure deployment, cloud runtime testing, and Kubernetes
+   implementation explicitly scoped as future work unless separately approved,
+   authenticated, and measured.
+
+## 12. Committed Infrastructure Files
+
+The Terraform infrastructure files below were committed in
+`5a499b2` (`Complete Milestone 3 methodology and infrastructure`) and pushed
+to `main`:
 
 ```text
 infra/terraform/.gitignore
